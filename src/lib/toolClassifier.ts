@@ -28,7 +28,7 @@ export interface ToolSpec {
 }
 
 export async function classifyIntentToTools(query: string): Promise<ToolSpec[]> {
-  const promptText = `Analyze this user intent and determine what functional tools should be built immediately: "${query}"
+  const prompt = `Analyze this user intent and determine what functional tools should be built immediately: "${query}"
 
 Tool primitives available:
 - video-player: for video content, tutorials, media
@@ -67,7 +67,10 @@ Return ONLY valid JSON with 1-3 tools that should be immediately functional. For
 }`
 
   try {
-    const response = await window.spark.llm(promptText, 'gpt-4o', true)
+    if (!window.spark || !window.spark.llm) {
+      throw new Error('Spark API not available')
+    }
+    const response = await window.spark.llm(prompt, 'gpt-4o', true)
     const parsed = JSON.parse(response)
     return parsed.tools || []
   } catch (error) {
